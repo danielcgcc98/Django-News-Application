@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% if article %}
+            Edit Article
+        {% else %}
+            Create Article
+        {% endif %}
+    </title>
+</head>
+
+<body>
+
+    <h1>
+        {% if article %}
+            Edit Article
+        {% else %}
+            Create New Article
+        {% endif %}
+    </h1>
+
+    {% if error %}
+        <p><strong>{{ error }}</strong></p>
+    {% endif %}
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <p>
+            <label for="title">Title:</label><br>
+            <input
+                type="text"
+                id="title"
+                name="title"
+                value="{{ article.title|default:'' }}"
+                required
+            >
+        </p>
+
+        <p>
+            <label for="content">Content:</label><br>
+            <textarea
+                id="content"
+                name="content"
+                rows="10"
+                cols="60"
+                required
+            >{{ article.content|default:'' }}</textarea>
+        </p>
+
+        <p>
+            <label for="publisher">Publisher:</label><br>
+
+            <select id="publisher" name="publisher">
+
+                <option value="">-- Select Publisher --</option>
+
+                {% for publisher in publishers %}
+
+                    <option
+                        value="{{ publisher.id }}"
+                        {% if article.publisher.id == publisher.id %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ publisher.name }}
+                    </option>
+
+                {% endfor %}
+
+            </select>
+        </p>
+
+        <button type="submit">
+            {% if article %}
+                Update Article
+            {% else %}
+                Submit Article
+            {% endif %}
+        </button>
+
+    </form>
+
+    <p>
+        <a href="{% url 'article_list' %}">
+            Back to Articles
+        </a>
+    </p>
+
+</body>
+</html>

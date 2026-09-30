@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Articles</title>
+</head>
+
+<body>
+
+    <h1>News Articles</h1>
+
+    <p>
+        Logged in as:
+        <strong>{{ user.username }}</strong>
+        ({{ user.role }})
+    </p>
+
+
+    <!-- =====================================================
+         JOURNALIST DASHBOARD
+         ===================================================== -->
+
+    {% if user.role == "Journalist" %}
+
+        <h2>Journalist Dashboard</h2>
+
+        <p>
+            <a href="{% url 'article_create' %}">
+                Create New Article
+            </a>
+        </p>
+
+        <h3>My Articles</h3>
+
+        {% if my_articles %}
+
+            {% for article in my_articles %}
+
+                <article>
+
+                    <h4>{{ article.title }}</h4>
+
+                    {% if article.approved %}
+                        <p>Status: Approved</p>
+                    {% else %}
+                        <p>Status: Pending Editor Approval</p>
+                    {% endif %}
+
+                    <p>
+
+                        <a href="{% url 'article_detail' article.id %}">
+                            View
+                        </a>
+
+                        |
+
+                        <a href="{% url 'article_edit' article.id %}">
+                            Edit
+                        </a>
+
+                        |
+
+                        <a href="{% url 'article_delete' article.id %}">
+                            Delete
+                        </a>
+
+                    </p>
+
+                </article>
+
+                <hr>
+
+            {% endfor %}
+
+        {% else %}
+
+            <p>You have not created any articles yet.</p>
+
+        {% endif %}
+
+    {% endif %}
+
+
+    <!-- =====================================================
+         EDITOR DASHBOARD
+         ===================================================== -->
+
+    {% if user.role == "Editor" %}
+
+        <h2>Editor Dashboard</h2>
+
+        <h3>Articles Pending Approval</h3>
+
+        {% if pending_articles %}
+
+            {% for article in pending_articles %}
+
+                <article>
+
+                    <h4>{{ article.title }}</h4>
+
+                    <p>
+                        Author:
+                        {{ article.author.username }}
+                    </p>
+
+                    {% if article.publisher %}
+
+                        <p>
+                            Publisher:
+                            {{ article.publisher.name }}
+                        </p>
+
+                    {% endif %}
+
+                    <p>
+                        Submitted:
+                        {{ article.created_at }}
+                    </p>
+
+                    <p>
+                        {{ article.content }}
+                    </p>
+
+                    <form
+                        method="POST"
+                        action="{% url 'approve_article' article.id %}"
+                    >
+
+                        {% csrf_token %}
+
+                        <button type="submit">
+                            Approve Article
+                        </button>
+
+                    </form>
+
+                </article>
+
+                <hr>
+
+            {% endfor %}
+
+        {% else %}
+
+            <p>No articles are currently waiting for approval.</p>
+
+        {% endif %}
+
+    {% endif %}
+
+
+    <!-- =====================================================
+         PUBLISHED ARTICLES
+         ===================================================== -->
+
+    <h2>Published Articles</h2>
+
+    {% if articles %}
+
+        {% for article in articles %}
+
+            <article>
+
+                <h3>
+                    <a href="{% url 'article_detail' article.id %}">
+                        {{ article.title }}
+                    </a>
+                </h3>
+
+                <p>
+                    {{ article.content }}
+                </p>
+
+                <p>
+                    Author:
+                    {{ article.author.username }}
+                </p>
+
+                {% if article.publisher %}
+
+                    <p>
+                        Publisher:
+                        {{ article.publisher.name }}
+                    </p>
+
+                {% endif %}
+
+                <p>
+                    Published:
+                    {{ article.created_at }}
+                </p>
+
+            </article>
+
+            <hr>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p>No approved articles are available.</p>
+
+    {% endif %}
+
+</body>
+
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ article.title }}</title>
+</head>
+<body>
+
+    <article>
+        <h1>{{ article.title }}</h1>
+
+        <p>{{ article.content }}</p>
+
+        <p>
+            Published: {{ article.created_at }}
+        </p>
+    </article>
+
+    <p>
+        <a href="{% url 'article_list' %}">Back to articles</a>
+    </p>
+
+</body>
+</html>
