@@ -5,8 +5,6 @@ import logging
 import requests
 from django.contrib.auth import get_user_model, login
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import Group
-from django.contrib.auth.views import LogoutView
 from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render

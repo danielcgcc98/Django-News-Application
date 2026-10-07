@@ -10,12 +10,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Article, Newsletter, Publisher
-from .serializers import (
-    ArticleSerializer,
-    NewsletterSerializer,
-    PublisherSerializer,
-    UserSerializer,
-)
+from .serializers import ArticleSerializer, NewsletterSerializer
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
