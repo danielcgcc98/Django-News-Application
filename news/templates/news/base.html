@@ -1,26 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}News Application{% endblock %}</title>
-    <style>
-        body{font-family:Arial,sans-serif;background:#f3f4f6;margin:0;color:#1f2937}
-        header{background:#111827;color:#fff;padding:15px 25px}
-        .navbar{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:20px}
-        .navbar h1{margin:0;font-size:24px}.nav-links{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-        .nav-links a,.logout-button{color:#fff;text-decoration:none;padding:8px 12px;border-radius:5px;background:transparent;border:0;cursor:pointer;font-size:14px}
-        .nav-links a:hover,.logout-button:hover{background:#374151}.logout-form{display:inline;margin:0}
-        main{max-width:1100px;margin:30px auto;padding:0 20px}.container{background:#fff;padding:28px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
-        .card{border:1px solid #e5e7eb;border-radius:8px;padding:18px;margin:14px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
-        h1,h2,h3{margin-top:0}a{color:#2563eb}button,input[type=submit],.button{display:inline-block;padding:9px 14px;border:0;border-radius:5px;background:#2563eb;color:#fff;text-decoration:none;cursor:pointer}
-        .button.secondary{background:#6b7280}.button.danger{background:#dc2626}.button:hover{opacity:.9}
-        input[type=text],input[type=email],input[type=password],select,textarea{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:5px;box-sizing:border-box;margin-top:5px}
-        textarea{resize:vertical}.field{margin-bottom:16px}.help{font-size:13px;color:#6b7280;margin-top:4px}.errorlist{color:#b91c1c;padding-left:20px}
-        .messages{margin-bottom:20px}.message{padding:12px;background:#e0f2fe;border-radius:6px}.inline-form{display:inline}.muted{color:#6b7280}
-        footer{text-align:center;color:#6b7280;padding:30px}
-        @media(max-width:700px){.navbar{flex-direction:column;align-items:flex-start}.nav-links{width:100%}}
-    </style>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
 <header>
@@ -35,7 +20,10 @@
             {% if user.is_authenticated and user.role == "Editor" %}<a href="{% url 'publisher_create' %}">Create Publisher</a>{% endif %}
             {% if user.is_authenticated %}{% if user.role == "Journalist" or user.role == "Editor" %}<a href="{% url 'newsletter_create' %}">Create Newsletter</a>{% endif %}{% endif %}
             {% if user.is_authenticated %}
-                <form method="post" action="{% url 'logout' %}" class="logout-form"><button type="submit" class="logout-button">Log out</button></form>
+                <form method="post" action="{% url 'logout' %}" class="logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-button">Log out</button>
+                </form>
             {% else %}
                 <a href="{% url 'login' %}">Login</a><a href="{% url 'register' %}">Register</a>
             {% endif %}

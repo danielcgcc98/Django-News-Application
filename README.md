@@ -13,7 +13,7 @@ A Django news application with Reader, Journalist and Editor roles, publisher su
 ## 1. Clone the project
 
 ```bash
-git clone https://github.com/danielgc98/Django-News-Application.git
+git clone https://github.com/danielcgcc98/Django-News-Application.git
 cd Django-News-Application
 ```
 

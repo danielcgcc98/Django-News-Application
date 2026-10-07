@@ -8,19 +8,47 @@ from . import api_views, views
 urlpatterns = [
     path("accounts/register/", views.register, name="register"),
     path("", views.article_list, name="article_list"),
-    path("article/<int:article_id>/", views.article_detail, name="article_detail"),
+    path(
+        "article/<int:article_id>/",
+        views.article_detail,
+        name="article_detail",
+    ),
     path("article/create/", views.article_create, name="article_create"),
-    path("article/<int:article_id>/edit/", views.article_edit, name="article_edit"),
-    path("article/<int:article_id>/delete/", views.article_delete, name="article_delete"),
-    path("article/<int:article_id>/approve/", views.approve_article, name="approve_article"),
+    path(
+        "article/<int:article_id>/edit/",
+        views.article_edit,
+        name="article_edit",
+    ),
+    path(
+        "article/<int:article_id>/delete/",
+        views.article_delete,
+        name="article_delete",
+    ),
+    path(
+        "article/<int:article_id>/approve/",
+        views.approve_article,
+        name="approve_article",
+    ),
 
     path("newsletters/", views.newsletter_list, name="newsletter_list"),
 
     path("publishers/", views.publisher_list, name="publisher_list"),
     path("publisher/create/", views.publisher_create, name="publisher_create"),
-    path("publisher/<int:publisher_id>/edit/", views.publisher_edit, name="publisher_edit"),
-    path("publisher/<int:publisher_id>/delete/", views.publisher_delete, name="publisher_delete"),
-    path("subscriptions/", views.subscription_manager, name="subscription_manager"),
+    path(
+        "publisher/<int:publisher_id>/edit/",
+        views.publisher_edit,
+        name="publisher_edit",
+    ),
+    path(
+        "publisher/<int:publisher_id>/delete/",
+        views.publisher_delete,
+        name="publisher_delete",
+    ),
+    path(
+        "subscriptions/",
+        views.subscription_manager,
+        name="subscription_manager",
+    ),
 
     path(
         "newsletter/<int:newsletter_id>/",

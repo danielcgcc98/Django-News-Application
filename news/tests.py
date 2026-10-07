@@ -1,8 +1,11 @@
 """Automated tests for the news website views and REST API permissions."""
 
+import re
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.contrib.staticfiles import finders
+from django.test import Client
 from django.urls import reverse
 from rest_framework.test import APITestCase
 
@@ -454,91 +457,193 @@ class NewsApplicationTests(APITestCase):
         self.assertContains(response, "Article title")
         self.assertContains(response, "Article content")
         self.assertContains(response, "Publisher (optional)")
-        self.assertContains(response, "Publish immediately as an independent article")
+        self.assertContains(
+            response, "Publish immediately as an independent article"
+        )
 
     def test_journalist_can_publish_independent_article(self):
-        """Test the journalist can publish independent article workflow."""
-        """Ensure an independent journalist article can be approved at creation."""
+        """Ensure an independent journalist article is approved on creation."""
         self.login(self.journalist)
-        response = self.client.post(reverse("article_create"), {"title": "Independent Story", "content": "Independent story content.", "publisher": "", "approve_independent": "on"})
+        response = self.client.post(
+            reverse("article_create"),
+            {
+                "title": "Independent Story",
+                "content": "Independent story content.",
+                "publisher": "",
+                "approve_independent": "on",
+            },
+        )
         self.assertEqual(response.status_code, 302)
         article = Article.objects.get(title="Independent Story")
         self.assertIsNone(article.publisher)
         self.assertTrue(article.approved)
 
     def test_newsletter_form_only_contains_approved_articles(self):
-        """Test the newsletter form only contains approved articles workflow."""
         """Ensure the website newsletter form excludes pending articles."""
         from .forms import NewsletterForm
         form = NewsletterForm()
-        article_ids = set(form.fields["articles"].queryset.values_list("id", flat=True))
+        article_ids = set(
+            form.fields["articles"].queryset.values_list("id", flat=True)
+        )
         self.assertIn(self.approved_article.id, article_ids)
         self.assertNotIn(self.article.id, article_ids)
 
     def test_journalist_can_edit_own_newsletter(self):
-        """Test the journalist can edit own newsletter workflow."""
         """Ensure a journalist can edit a newsletter they own."""
-        newsletter = Newsletter.objects.create(title="Own Newsletter", description="Own description.", author=self.journalist)
+        newsletter = Newsletter.objects.create(
+            title="Own Newsletter",
+            description="Own description.",
+            author=self.journalist,
+        )
         self.login(self.journalist)
-        response = self.client.post(reverse("newsletter_edit", args=[newsletter.id]), {"title": "Updated Newsletter", "description": "Updated.", "articles": [self.approved_article.id]})
+        response = self.client.post(
+            reverse("newsletter_edit", args=[newsletter.id]),
+            {
+                "title": "Updated Newsletter",
+                "description": "Updated.",
+                "articles": [self.approved_article.id],
+            },
+        )
         self.assertEqual(response.status_code, 302)
         newsletter.refresh_from_db()
         self.assertEqual(newsletter.title, "Updated Newsletter")
 
     def test_journalist_cannot_edit_other_newsletter(self):
-        """Test the journalist cannot edit other newsletter workflow."""
         """Ensure journalists cannot edit another user's newsletter."""
-        newsletter = Newsletter.objects.create(title="Other Newsletter", description="Other description.", author=self.other_journalist)
+        newsletter = Newsletter.objects.create(
+            title="Other Newsletter",
+            description="Other description.",
+            author=self.other_journalist,
+        )
         self.login(self.journalist)
-        response = self.client.post(reverse("newsletter_edit", args=[newsletter.id]), {"title": "Unauthorized", "description": "No"})
+        response = self.client.post(
+            reverse("newsletter_edit", args=[newsletter.id]),
+            {"title": "Unauthorized", "description": "No"},
+        )
         self.assertEqual(response.status_code, 403)
 
     def test_journalist_cannot_delete_other_newsletter(self):
-        """Test the journalist cannot delete other newsletter workflow."""
         """Ensure journalists cannot delete another user's newsletter."""
-        newsletter = Newsletter.objects.create(title="Other Newsletter", description="Other description.", author=self.other_journalist)
+        newsletter = Newsletter.objects.create(
+            title="Other Newsletter",
+            description="Other description.",
+            author=self.other_journalist,
+        )
         self.login(self.journalist)
-        response = self.client.post(reverse("newsletter_delete", args=[newsletter.id]))
+        response = self.client.post(
+            reverse("newsletter_delete", args=[newsletter.id])
+        )
         self.assertEqual(response.status_code, 403)
 
     def test_editor_can_create_publisher_frontend(self):
-        """Test the editor can create publisher frontend workflow."""
-        """Ensure an editor can create and staff a publisher from the website."""
+        """Ensure an editor can create and staff a publisher on the website."""
         self.login(self.editor)
-        response = self.client.post(reverse("publisher_create"), {"name": "Frontend Publisher", "editors": [self.editor.id], "journalists": [self.journalist.id]})
+        response = self.client.post(
+            reverse("publisher_create"),
+            {
+                "name": "Frontend Publisher",
+                "editors": [self.editor.id],
+                "journalists": [self.journalist.id],
+            },
+        )
         self.assertEqual(response.status_code, 302)
         publisher = Publisher.objects.get(name="Frontend Publisher")
         self.assertIn(self.editor, publisher.editors.all())
         self.assertIn(self.journalist, publisher.journalists.all())
 
     def test_reader_can_manage_subscriptions_frontend(self):
-        """Test the reader can manage subscriptions frontend workflow."""
         """Ensure readers can subscribe and unsubscribe from the website."""
         self.login(self.reader)
-        response = self.client.post(reverse("subscription_manager"), {"subscription_type": "journalist", "object_id": self.journalist.id, "action": "subscribe"})
+        subscription = {
+            "subscription_type": "journalist",
+            "object_id": self.journalist.id,
+        }
+        response = self.client.post(
+            reverse("subscription_manager"),
+            {**subscription, "action": "subscribe"},
+        )
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(self.reader.subscribed_journalists.filter(id=self.journalist.id).exists())
-        response = self.client.post(reverse("subscription_manager"), {"subscription_type": "journalist", "object_id": self.journalist.id, "action": "unsubscribe"})
+        self.assertTrue(
+            self.reader.subscribed_journalists.filter(
+                id=self.journalist.id
+            ).exists()
+        )
+        response = self.client.post(
+            reverse("subscription_manager"),
+            {**subscription, "action": "unsubscribe"},
+        )
         self.assertEqual(response.status_code, 302)
-        self.assertFalse(self.reader.subscribed_journalists.filter(id=self.journalist.id).exists())
+        self.assertFalse(
+            self.reader.subscribed_journalists.filter(
+                id=self.journalist.id
+            ).exists()
+        )
 
     def test_non_reader_cannot_manage_subscriptions_frontend(self):
-        """Test the non reader cannot manage subscriptions frontend workflow."""
         """Ensure only readers can use the website subscription manager."""
         self.login(self.journalist)
         response = self.client.get(reverse("subscription_manager"))
         self.assertEqual(response.status_code, 403)
 
     def test_non_editor_cannot_create_publisher_frontend(self):
-        """Test the non editor cannot create publisher frontend workflow."""
         """Ensure publisher creation is restricted to editors."""
         self.login(self.journalist)
-        response = self.client.post(reverse("publisher_create"), {"name": "Blocked Publisher"})
+        response = self.client.post(
+            reverse("publisher_create"), {"name": "Blocked Publisher"}
+        )
         self.assertEqual(response.status_code, 403)
 
     def test_api_rejects_unapproved_article_in_newsletter(self):
-        """Test the api rejects unapproved article in newsletter workflow."""
         """Ensure the REST newsletter endpoint rejects pending articles."""
         self.api_login(self.journalist)
-        response = self.client.post("/api/newsletters/", {"title": "Bad Newsletter", "description": "Contains pending content.", "articles": [self.article.id]}, format="json")
+        response = self.client.post(
+            "/api/newsletters/",
+            {
+                "title": "Bad Newsletter",
+                "description": "Contains pending content.",
+                "articles": [self.article.id],
+            },
+            format="json",
+        )
         self.assertEqual(response.status_code, 400)
+
+    # Logout and static files
+    def test_logout_works_for_every_role_with_csrf_checks(self):
+        """Ensure each role can log out via the base template's form."""
+        for user in (self.reader, self.journalist, self.editor):
+            with self.subTest(role=user.role):
+                csrf_client = Client(enforce_csrf_checks=True)
+                csrf_client.login(
+                    username=user.username, password="password123"
+                )
+                page = csrf_client.get(reverse("article_list"))
+                self.assertEqual(page.status_code, 200)
+                form_html = re.search(
+                    r'<form[^>]*class="logout-form".*?</form>',
+                    page.content.decode(),
+                    re.S,
+                ).group(0)
+                token = re.search(
+                    r'name="csrfmiddlewaretoken" value="([^"]+)"', form_html
+                )
+                self.assertIsNotNone(token)
+                response = csrf_client.post(
+                    reverse("logout"),
+                    {"csrfmiddlewaretoken": token.group(1)},
+                )
+                self.assertEqual(response.status_code, 302)
+                follow_up = csrf_client.get(reverse("article_list"))
+                self.assertEqual(follow_up.status_code, 302)
+
+    def test_templates_load_external_stylesheets(self):
+        """Ensure pages link to CSS served by Django's static files."""
+        self.login(self.reader)
+        page = self.client.get(reverse("article_list"))
+        self.assertContains(page, '/static/css/style.css')
+        self.assertNotContains(page, "<style")
+        self.client.logout()
+        login_page = self.client.get(reverse("login"))
+        self.assertContains(login_page, '/static/css/auth.css')
+        self.assertNotContains(login_page, "<style")
+        self.assertIsNotNone(finders.find("css/style.css"))
+        self.assertIsNotNone(finders.find("css/auth.css"))
