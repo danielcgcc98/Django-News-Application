@@ -1,0 +1,15 @@
+{% extends "news/base.html" %}
+{% block title %}{% if mode == "edit" %}Edit Article{% else %}Create Article{% endif %}{% endblock %}
+{% block content %}
+<h1>{% if mode == "edit" %}Edit Article{% else %}Create Article{% endif %}</h1>
+{% if form.non_field_errors %}{{ form.non_field_errors }}{% endif %}
+<form method="post">
+    {% csrf_token %}
+    <div class="field">{{ form.title.label_tag }}{{ form.title }}{{ form.title.errors }}</div>
+    <div class="field">{{ form.content.label_tag }}{{ form.content }}{{ form.content.errors }}</div>
+    <div class="field">{{ form.publisher.label_tag }}{{ form.publisher }}<div class="help">Choose a publisher or select the independent option.</div>{{ form.publisher.errors }}</div>
+    <div class="field">{{ form.approve_independent }} {{ form.approve_independent.label_tag }}<div class="help">{{ form.approve_independent.help_text }}</div></div>
+    <button type="submit">{% if mode == "edit" %}Update Article{% else %}Save Article{% endif %}</button>
+    <a class="button secondary" href="{% url 'article_list' %}">Cancel</a>
+</form>
+{% endblock %}

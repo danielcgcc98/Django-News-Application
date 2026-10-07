@@ -1,0 +1,6 @@
+{% extends "news/base.html" %}
+{% block title %}Delete Publisher{% endblock %}
+{% block content %}
+<h1>Delete Publisher</h1><p>Are you sure you want to delete <strong>{{ publisher.name }}</strong>?</p>
+<form method="post">{% csrf_token %}<button class="button danger" type="submit">Yes, Delete Publisher</button> <a class="button secondary" href="{% url 'publisher_list' %}">Cancel</a></form>
+{% endblock %}

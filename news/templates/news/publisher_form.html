@@ -1,0 +1,11 @@
+{% extends "news/base.html" %}
+{% block title %}{% if mode == "edit" %}Edit Publisher{% else %}Create Publisher{% endif %}{% endblock %}
+{% block content %}
+<h1>{% if mode == "edit" %}Edit Publisher{% else %}Create Publisher{% endif %}</h1>
+<form method="post">{% csrf_token %}
+<div class="field">{{ form.name.label_tag }}{{ form.name }}{{ form.name.errors }}</div>
+<div class="field">{{ form.editors.label_tag }}{{ form.editors }}{{ form.editors.errors }}</div>
+<div class="field">{{ form.journalists.label_tag }}{{ form.journalists }}{{ form.journalists.errors }}</div>
+<button type="submit">Save Publisher</button> <a class="button secondary" href="{% url 'publisher_list' %}">Cancel</a>
+</form>
+{% endblock %}

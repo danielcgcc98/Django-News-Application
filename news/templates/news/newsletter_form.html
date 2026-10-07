@@ -1,0 +1,12 @@
+{% extends "news/base.html" %}
+{% block title %}{% if mode == "edit" %}Edit Newsletter{% else %}Create Newsletter{% endif %}{% endblock %}
+{% block content %}
+<h1>{% if mode == "edit" %}Edit Newsletter{% else %}Create Newsletter{% endif %}</h1>
+{% if form.non_field_errors %}{{ form.non_field_errors }}{% endif %}
+<form method="post">{% csrf_token %}
+<div class="field">{{ form.title.label_tag }}{{ form.title }}{{ form.title.errors }}</div>
+<div class="field">{{ form.description.label_tag }}{{ form.description }}{{ form.description.errors }}</div>
+<div class="field">{{ form.articles.label_tag }}<div>{{ form.articles }}</div>{{ form.articles.errors }}</div>
+<button type="submit">Save Newsletter</button> <a class="button secondary" href="{% url 'newsletter_list' %}">Cancel</a>
+</form>
+{% endblock %}

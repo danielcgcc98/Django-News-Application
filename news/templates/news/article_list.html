@@ -1,0 +1,17 @@
+{% extends "news/base.html" %}
+{% block title %}Articles{% endblock %}
+{% block content %}
+<h1>Articles</h1>
+<p class="muted">Logged in as <strong>{{ user.username }}</strong> ({{ user.role }}).</p>
+{% if user.role == "Journalist" %}
+<div class="card"><h2>My Articles</h2><p><a class="button" href="{% url 'article_create' %}">Create Article</a></p>
+{% for article in my_articles %}<div class="card"><h3><a href="{% url 'article_detail' article.id %}">{{ article.title }}</a></h3><p>Status: {% if article.approved %}<strong>Approved</strong>{% else %}<strong>Pending approval</strong>{% endif %}</p><a class="button secondary" href="{% url 'article_edit' article.id %}">Edit</a> <a class="button danger" href="{% url 'article_delete' article.id %}">Delete</a></div>{% empty %}<p>You have not created any articles yet.</p>{% endfor %}</div>
+{% endif %}
+{% if user.role == "Editor" %}
+<div class="card"><h2>Editor Dashboard</h2><h3>Articles Pending Approval</h3>
+{% for article in pending_articles %}<div class="card"><h3>{{ article.title }}</h3><p>Author: {{ article.author.username }}</p>{% if article.publisher %}<p>Publisher: {{ article.publisher.name }}</p>{% else %}<p>Independent article</p>{% endif %}<p>{{ article.content }}</p><form method="post" action="{% url 'approve_article' article.id %}" class="inline-form">{% csrf_token %}<button type="submit">Approve Article</button></form> <a class="button secondary" href="{% url 'article_edit' article.id %}">Edit</a> <a class="button danger" href="{% url 'article_delete' article.id %}">Delete</a></div>{% empty %}<p>No articles are currently waiting for approval.</p>{% endfor %}
+<h3>All Articles</h3>{% for article in all_articles_for_editor %}<p><a href="{% url 'article_detail' article.id %}">{{ article.title }}</a> — <a href="{% url 'article_edit' article.id %}">Edit</a> | <a href="{% url 'article_delete' article.id %}">Delete</a></p>{% empty %}<p>No articles are available.</p>{% endfor %}</div>
+{% endif %}
+<h2>Published Articles</h2>
+{% for article in articles %}<article class="card"><h3><a href="{% url 'article_detail' article.id %}">{{ article.title }}</a></h3><p>{{ article.content|truncatewords:50 }}</p><p>Author: {{ article.author.username }}{% if article.publisher %} · Publisher: {{ article.publisher.name }}{% endif %}</p><p class="muted">Published: {{ article.created_at }}</p>{% if user.role == "Editor" %}<a href="{% url 'article_edit' article.id %}">Edit</a> | <a href="{% url 'article_delete' article.id %}">Delete</a>{% endif %}</article>{% empty %}<p>No approved articles are available.</p>{% endfor %}
+{% endblock %}

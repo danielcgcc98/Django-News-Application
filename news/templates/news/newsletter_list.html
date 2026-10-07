@@ -1,0 +1,7 @@
+{% extends "news/base.html" %}
+{% block title %}Newsletters{% endblock %}
+{% block content %}
+<h1>Newsletters</h1>
+{% if user.role == "Journalist" or user.role == "Editor" %}<p><a class="button" href="{% url 'newsletter_create' %}">Create Newsletter</a></p>{% endif %}
+{% for newsletter in newsletters %}<article class="card"><h2><a href="{% url 'newsletter_detail' newsletter.id %}">{{ newsletter.title }}</a></h2><p>{{ newsletter.description|truncatewords:40 }}</p><p class="muted">Created by {{ newsletter.author.username }}</p><a class="button secondary" href="{% url 'newsletter_detail' newsletter.id %}">View</a>{% if user.role == "Editor" or user.role == "Journalist" and newsletter.author_id == user.id %} <a class="button" href="{% url 'newsletter_edit' newsletter.id %}">Edit</a> <a class="button danger" href="{% url 'newsletter_delete' newsletter.id %}">Delete</a>{% endif %}</article>{% empty %}<p>No newsletters are currently available.</p>{% endfor %}
+{% endblock %}

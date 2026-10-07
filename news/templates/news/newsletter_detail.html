@@ -1,0 +1,9 @@
+{% extends "news/base.html" %}
+{% block title %}{{ newsletter.title }}{% endblock %}
+{% block content %}
+<h1>{{ newsletter.title }}</h1><p>{{ newsletter.description }}</p><p class="muted">Created by {{ newsletter.author.username }}</p>
+<h2>Approved Articles</h2>
+<ul>{% for article in newsletter.articles.all %}<li><a href="{% url 'article_detail' article.id %}">{{ article.title }}</a></li>{% empty %}<li>No articles are included.</li>{% endfor %}</ul>
+{% if can_manage %}<a class="button" href="{% url 'newsletter_edit' newsletter.id %}">Edit Newsletter</a> <a class="button danger" href="{% url 'newsletter_delete' newsletter.id %}">Delete Newsletter</a>{% endif %}
+<p><a href="{% url 'newsletter_list' %}">← Back to Newsletters</a></p>
+{% endblock %}
