@@ -7,13 +7,14 @@ A Django news application with Reader, Journalist and Editor roles, publisher su
 - Python 3.12+
 - MariaDB 10.6+
 - Git
+- Docker Desktop (only for running the app in Docker)
 - A MariaDB user/database for the application
 
 ## 1. Clone the project
 
 ```bash
-git clone https://github.com/danielgcg98/Django-News-Application.git
-cd Django_News_Application
+git clone https://github.com/danielgc98/Django-News-Application.git
+cd Django-News-Application
 ```
 
 If you are working from the submitted ZIP instead, extract the project and open a terminal in the folder containing `manage.py`.
@@ -126,6 +127,63 @@ http://127.0.0.1:8000/
 ```
 
 Register users with the Reader, Journalist or Editor role.
+
+## 10. Run the application with Docker
+
+The Docker image contains the Django application only. It connects to the
+MariaDB server that is already running on your computer, so complete steps
+4 to 7 above first (database, user, `.env` file and migrations).
+
+The `.env` file is never copied into the image (see `.dockerignore`); it is
+passed to the container when it starts.
+
+Build the image from the folder containing the `Dockerfile`:
+
+```bash
+docker build -t django-news-app .
+```
+
+Run the container:
+
+```bash
+docker run --rm -p 8000:8000 --env-file .env \
+  -e DB_HOST=host.docker.internal \
+  django-news-app
+```
+
+`DB_HOST=host.docker.internal` lets the container reach MariaDB on the host
+machine. Open:
+
+```text
+http://127.0.0.1:8000/
+```
+
+Stop the container with `Ctrl+C`.
+
+If MariaDB rejects the connection from Docker, allow the application user to
+connect from the container network (run as a MariaDB administrator):
+
+```sql
+CREATE USER IF NOT EXISTS 'news_user'@'%' IDENTIFIED BY 'your-mariadb-password';
+GRANT ALL PRIVILEGES ON news_db.* TO 'news_user'@'%';
+FLUSH PRIVILEGES;
+```
+
+## 11. Documentation (Sphinx)
+
+Generated HTML documentation is included in `docs/_build/html/`.
+Open `docs/_build/html/index.html` in a browser.
+
+To rebuild it, activate the virtual environment and run:
+
+```bash
+pip install sphinx
+cd docs
+make html
+```
+
+`docs/conf.py` loads Django with `DJANGO_SETTINGS_MODULE=news_project.settings`
+so the code reference is generated from the project's docstrings.
 
 ## User roles
 
@@ -246,11 +304,14 @@ Readers can view newsletters. Journalists and editors can manage newsletters acc
 ## Project structure
 
 ```text
-Django_News_Application/
+Django-News-Application/
 ├── manage.py
 ├── requirements.txt
 ├── README.md
+├── Dockerfile
+├── .dockerignore
 ├── .env.example
+├── docs/                 Sphinx source and generated HTML (docs/_build/html)
 ├── news_project/
 │   ├── settings.py
 │   ├── urls.py

@@ -1,0 +1,1 @@
+https://github.com/danielgc98/Django-News-Application
