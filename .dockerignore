@@ -1,0 +1,9 @@
+# Keep secrets, virtual environments and Git data out of the Docker image.
+.env
+.git
+.venv
+venv
+env
+__pycache__
+*.pyc
+docs/_build
