@@ -1,3 +1,5 @@
+"""Automated tests for the news website views and REST API permissions."""
+
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
@@ -444,9 +446,7 @@ class NewsApplicationTests(APITestCase):
         self.assertEqual(response.status_code, 201)
         self.assertTrue(response.data["approved"])
 
-
     def test_article_create_page_shows_input_fields(self):
-        """Test the article create page shows input fields workflow."""
         """Ensure the article form renders visible labels and inputs."""
         self.login(self.journalist)
         response = self.client.get(reverse("article_create"))
